@@ -989,11 +989,12 @@ class PosixFileSystem : public FileSystem {
 
 #ifdef ROCKSDB_IOURING_PRESENT
   bool IsIOUringEnabled() {
-    if (RocksDbIOUringEnable && RocksDbIOUringEnable()) {
+    return true;
+    /* if (RocksDbIOUringEnable && RocksDbIOUringEnable()) {
       return true;
     } else {
       return false;
-    }
+    } */
   }
 #endif  // ROCKSDB_IOURING_PRESENT
 
