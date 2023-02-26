@@ -871,13 +871,12 @@ IOStatus PosixRandomAccessFile::ReadAsync(
       iu = CreateIOUring();
       if (iu != nullptr) {
         thread_local_io_urings_->Reset(iu);
+      } else {
+        return IOStatus::NotSupported("ReadAsync, but failed to CreateIOUring()");
       }
     }
-  }
-
-  // Init failed, platform doesn't support io_uring.
-  if (iu == nullptr) {
-    return IOStatus::NotSupported("ReadAsync");
+  } else {
+    return IOStatus::NotSupported("ReadAsync, but thread_local_io_urings_ not initialized");
   }
 
   // Allocate io_handle.
@@ -920,7 +919,7 @@ IOStatus PosixRandomAccessFile::ReadAsync(
   (void)cb_arg;
   (void)io_handle;
   (void)del_fn;
-  return IOStatus::NotSupported("ReadAsync");
+  return IOStatus::NotSupported("ReadAsync, but compiled without ROCKSDB_IOURING_PRESENT");
 #endif
 }
 
