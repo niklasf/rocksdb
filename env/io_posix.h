@@ -271,6 +271,7 @@ inline struct io_uring* CreateIOUring() {
   struct io_uring* new_io_uring = new struct io_uring;
   int ret = io_uring_queue_init(kIoUringDepth, new_io_uring, 0);
   if (ret) {
+    fprintf(stderr, "io_uring_queue_init error: %d\n", ret);
     delete new_io_uring;
     new_io_uring = nullptr;
   }
