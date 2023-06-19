@@ -2024,6 +2024,8 @@ extern ROCKSDB_LIBRARY_API size_t
 rocksdb_cache_get_table_address_count(const rocksdb_cache_t* cache);
 extern ROCKSDB_LIBRARY_API size_t
 rocksdb_cache_get_occupancy_count(const rocksdb_cache_t* cache);
+extern ROCKSDB_LIBRARY_API void rocksdb_cache_set_secondary_cache(
+    rocksdb_secondary_cache_t* secondary_cache);
 
 /* HyperClockCache */
 
@@ -2049,6 +2051,51 @@ extern ROCKSDB_LIBRARY_API rocksdb_cache_t* rocksdb_cache_create_hyper_clock(
 extern ROCKSDB_LIBRARY_API rocksdb_cache_t*
 rocksdb_cache_create_hyper_clock_opts(
     const rocksdb_hyper_clock_cache_options_t*);
+
+/* SecondaryCacheResultHandle */
+
+extern ROCKSDB_LIBRARY_API rocksdb_secondary_cache_handle_t*
+rocksdb_secondary_cache_handle_create(
+    void* state,
+    void (*destructor)(void* state),
+    bool (*is_ready)(void* state),
+    void (*wait)(void* state),
+    void* (*value)(void* state),
+    size_t (*size)(void* state));
+extern ROCKSDB_LIBRARY_API void rocksdb_secondary_cache_handle_destroy(
+    rocksdb_secondary_cache_handle_t*);
+
+/* SecondaryCache */
+
+extern ROCKSDB_LIBRARY_API rocksdb_secondary_cache_t*
+rocksdb_secondary_cache_create(
+    void* state,
+    void (*destructor)(void* state),
+    const char* (*name)(const void* state),
+    char (*insert)(void* state,
+                   const char* key, size_t key_len,
+                   void* obj,
+                   size_t (*size_cb)(void* obj),
+                   char (*saveto_cb)(void* obj, size_t from_offset,
+                                     size_t length, char* out_buf)),
+    rocksdb_secondary_cache_handle_t*
+    (*lookup)(void* state,
+              const char* key, size_t key_len,
+              char (*create_db)(const char* data, size_t data_len,
+                                void* context,
+                                void** out_obj,
+                                size_t* out_charge),
+              void *create_context,
+              bool wait,
+              bool advise_erase,
+              bool* kept_in_sec_cache),
+    bool (*support_force_erase)(const void* state),
+    void (*erase)(void* state, const char* key, size_t key_len),
+    void (*wait_all)(void* state,
+                     rocksdb_secondary_cache_handle_t** handles,
+                     size_t num_handles));
+extern ROCKSDB_LIBRARY_API void rocksdb_secondary_cache_destroy(
+    rocksdb_secondary_cache_t*);
 
 /* DBPath */
 
